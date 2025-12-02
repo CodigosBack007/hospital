@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 @Configuration
 @OpenAPIDefinition(
     info = @Info(
-        title = " Hospital Com Vida",
+        title = "Gerenciamento de Tarefas",
         version = "1.0",
         description = "email para contato: joaogabrielfaria080b@gmail.com"
     )

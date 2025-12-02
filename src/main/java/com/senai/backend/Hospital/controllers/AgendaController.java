@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/agendas")
+@RequestMapping("/agenda")
 public class AgendaController {
 
     private final AgendaService service;
@@ -40,17 +40,17 @@ public class AgendaController {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/buscar por{id}")
     public ResponseEntity<?> buscar(@PathVariable Integer id) {
         return service.buscar(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping
+    @GetMapping("/lista-de-ativos")
     public ResponseEntity<List<Agenda>> listarAtivos() {
         return ResponseEntity.ok(service.listarAtivos());
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/desativar por id{id}")
     public ResponseEntity<?> desativar(@PathVariable Integer id) {
         try {
             service.desativarAgenda(id);
