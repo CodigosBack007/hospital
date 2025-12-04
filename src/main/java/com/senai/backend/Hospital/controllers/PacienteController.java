@@ -1,11 +1,19 @@
 package com.senai.backend.Hospital.controllers;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.senai.backend.Hospital.models.Paciente;
 import com.senai.backend.Hospital.services.PacienteService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/pacientes")
@@ -17,43 +25,37 @@ public class PacienteController {
         this.service = service;
     }
 
-    @PostMapping
-    public ResponseEntity<?> criar(@RequestBody Paciente paciente) {
-        try {
-            Paciente criado = service.criar(paciente);
-            return ResponseEntity.ok(criado);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @PostMapping("/salvar")
+    public ResponseEntity<?> salvarPaciente(@RequestBody Paciente p) {
+        try { return ResponseEntity.ok(service.salvar(p)); }
+        catch (Exception e) { return ResponseEntity.badRequest().body(e.getMessage()); }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> buscar(@PathVariable Integer id) {
-        return service.buscar(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    @GetMapping("/buscar por {id}")
+    public ResponseEntity<?> buscarPacientePorId(@PathVariable Integer id) {
+        Paciente p = service.buscarPorId(id);
+        return p == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(p);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Paciente>> listarAtivos() {
-        return ResponseEntity.ok(service.listarAtivos());
+    @GetMapping("/listar")
+    public ResponseEntity<List<Paciente>> listarPacientes() {
+        return ResponseEntity.ok(service.listarTodos());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Integer id, @RequestBody Paciente p) {
-        try {
-            Paciente atualizado = service.atualizar(id, p);
-            return ResponseEntity.ok(atualizado);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping("/count")
+    public ResponseEntity<Long> contarPacientes() {
+        return ResponseEntity.ok(service.contar());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> desativar(@PathVariable Integer id) {
-        try {
-            service.desativar(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    @DeleteMapping("/Remover por {id}")
+    public ResponseEntity<?> removerPacientePorId(@PathVariable Integer id) {
+        try { service.removerPorId(id); return ResponseEntity.noContent().build(); }
+        catch (Exception e) { return ResponseEntity.status(500).body(e.getMessage()); }
+    }
+
+    @PutMapping("/Atualizar por {id}")
+    public ResponseEntity<?> atualizarPacientePorId(@PathVariable Integer id, @RequestBody Paciente p) {
+        try { return ResponseEntity.ok(service.atualizar(id, p)); }
+        catch (Exception e) { return ResponseEntity.badRequest().body(e.getMessage()); }
     }
 }

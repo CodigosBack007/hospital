@@ -1,11 +1,12 @@
 package com.senai.backend.Hospital.services;
 
-import com.senai.backend.Hospital.models.Tratamento;
-import com.senai.backend.Hospital.repositories.TratamentoRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import com.senai.backend.Hospital.models.Tratamento;
+import com.senai.backend.Hospital.repositories.TratamentoRepository;
 
 @Service
 public class TratamentoService {
@@ -16,7 +17,7 @@ public class TratamentoService {
         this.repo = repo;
     }
 
-    public Tratamento criar(Tratamento t) {
+    public Tratamento salvar(Tratamento t) {
         LocalDateTime now = LocalDateTime.now();
         t.setDataCriacao(now);
         t.setDataAtualizacao(now);
@@ -24,8 +25,20 @@ public class TratamentoService {
         return repo.save(t);
     }
 
-    public Optional<Tratamento> buscarAtivo(Integer id) {
-        return repo.findByIdAndStatusTrue(id);
+    public Tratamento buscarPorId(Integer id) {
+        return repo.findById(id).orElse(null);
+    }
+
+    public List<Tratamento> listarTodos() {
+        return repo.findAll();
+    }
+
+    public Long contar() {
+        return repo.count();
+    }
+
+    public void removerPorId(Integer id) {
+        repo.deleteById(id);
     }
 
     public Tratamento atualizar(Integer id, Tratamento novo) {
@@ -33,8 +46,12 @@ public class TratamentoService {
         atual.setDescricao(novo.getDescricao());
         atual.setCusto(novo.getCusto());
         atual.setCategoria(novo.getCategoria());
-        atual.setStatus(novo.getStatus() == null ? atual.getStatus() : novo.getStatus());
-        atual.setDataAtualizacao(LocalDateTime.now());
+        actualizarStatusENovasDatas(atual, novo);
         return repo.save(atual);
+    }
+
+    private void actualizarStatusENovasDatas(Tratamento atual, Tratamento novo) {
+        atual.setStatus(novo.getStatus());
+        atual.setDataAtualizacao(LocalDateTime.now());
     }
 }

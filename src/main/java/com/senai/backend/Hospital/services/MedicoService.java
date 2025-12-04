@@ -1,12 +1,12 @@
 package com.senai.backend.Hospital.services;
 
-import com.senai.backend.Hospital.models.Medico;
-import com.senai.backend.Hospital.repositories.MedicoRepository;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.senai.backend.Hospital.models.Medico;
+import com.senai.backend.Hospital.repositories.MedicoRepository;
 
 @Service
 public class MedicoService {
@@ -17,7 +17,7 @@ public class MedicoService {
         this.medicoRepo = medicoRepo;
     }
 
-    public Medico criar(Medico m) {
+    public Medico salvar(Medico m) {
         LocalDateTime now = LocalDateTime.now();
         m.setDataCriacao(now);
         m.setDataAtualizacao(now);
@@ -25,12 +25,20 @@ public class MedicoService {
         return medicoRepo.save(m);
     }
 
-    public Optional<Medico> buscar(Integer id) {
-        return medicoRepo.findById(id);
+    public Medico buscarPorId(Integer id) {
+        return medicoRepo.findById(id).orElse(null);
     }
 
-    public List<Medico> listarAtivos() {
-        return medicoRepo.findByStatusTrue();
+    public List<Medico> listarTodos() {
+        return medicoRepo.findAll();
+    }
+
+    public Long contar() {
+        return medicoRepo.count();
+    }
+
+    public void removerPorId(Integer id) {
+        medicoRepo.deleteById(id);
     }
 
     public Medico atualizar(Integer id, Medico novo) {
@@ -42,7 +50,7 @@ public class MedicoService {
         atual.setContato(novo.getContato());
         atual.setTurno(novo.getTurno());
         atual.setLimiteDiario(novo.getLimiteDiario());
-        atual.setStatus(novo.getStatus() == null ? atual.getStatus() : novo.getStatus());
+        atual.setStatus(novo.getStatus());
         atual.setDataAtualizacao(LocalDateTime.now());
         return medicoRepo.save(atual);
     }

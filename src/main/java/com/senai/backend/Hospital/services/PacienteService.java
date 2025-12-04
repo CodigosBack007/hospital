@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PacienteService {
@@ -21,7 +20,7 @@ public class PacienteService {
         this.agendaRepo = agendaRepo;
     }
 
-    public Paciente criar(Paciente p) {
+    public Paciente salvar(Paciente p) {
         LocalDateTime now = LocalDateTime.now();
         p.setDataCriacao(now);
         p.setDataAtualizacao(now);
@@ -29,41 +28,53 @@ public class PacienteService {
         return pacienteRepo.save(p);
     }
 
-    public Optional<Paciente> buscar(Integer id) {
-        return pacienteRepo.findById(id);
+    public Paciente buscarPorId(Integer id) {
+        return pacienteRepo.findById(id).orElse(null);
     }
 
-    public List<Paciente> listarAtivos() {
-        return pacienteRepo.findByStatusTrue();
+    public List<Paciente> listarTodos() {
+        return pacienteRepo.findAll();
     }
 
+    public Long contar() {
+        return pacienteRepo.count();
+    }
+
+    public void removerPorId(Integer id) {
+        pacienteRepo.deleteById(id);
+    }
+
+    // atualização total; se status mudar pra false, desativa futuras agendas (regra de negócio)
     public Paciente atualizar(Integer id, Paciente novo) {
         Paciente atual = pacienteRepo.findById(id).orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+        Boolean antigoStatus = atual.getStatus();
+
         atual.setNome(novo.getNome());
         atual.setEndereco(novo.getEndereco());
         atual.setContato(novo.getContato());
         atual.setDescricao(novo.getDescricao());
-        atual.setStatus(novo.getStatus() == null ? atual.getStatus() : novo.getStatus());
+        atual.setStatus(novo.getStatus());
         atual.setDataAtualizacao(LocalDateTime.now());
-        return pacienteRepo.save(atual);
-    }
 
-    // Regra 10: ao desativar paciente, futuros agendamentos desse paciente são desativados
-    public void desativar(Integer id) {
-        Paciente p = pacienteRepo.findById(id).orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
-        p.setStatus(false);
-        p.setDataAtualizacao(LocalDateTime.now());
-        pacienteRepo.save(p);
+        Paciente salvo = pacienteRepo.save(atual);
 
-        // iterar agendas ativas do paciente e desativar as futuras
-        List<Agenda> agendas = agendaRepo.findByPacienteIdAndStatusTrue(id);
-        LocalDateTime agora = LocalDateTime.now();
-        for (Agenda a : agendas) {
-            if (a.getDataHora() != null && a.getDataHora().isAfter(agora)) {
-                a.setStatus(false);
-                a.setDataAtualizacao(LocalDateTime.now());
-                agendaRepo.save(a);
+        if (Boolean.TRUE.equals(antigoStatus) && Boolean.FALSE.equals(novo.getStatus())) {
+            // desativar futuras agendas
+            List<Agenda> agendas = agendaRepo.findByPacienteIdAndStatusTrue(id);
+            LocalDateTime agora = LocalDateTime.now();
+            for (Agenda a : agendas) {
+                if (a.getHorario() != null && a.getHorario().getDia() != null) {
+                    // comparar data do horario com hoje
+                    if (a.getHorario().getDia().isAfter(agora.toLocalDate()) ||
+                        (a.getHorario().getDia().isEqual(agora.toLocalDate()) && a.getHorario().getHoraInicial().isAfter(agora.toLocalTime()))) {
+                        a.setStatus(false);
+                        a.setDataAtualizacao(LocalDateTime.now());
+                        agendaRepo.save(a);
+                    }
+                }
             }
         }
+
+        return salvo;
     }
 }

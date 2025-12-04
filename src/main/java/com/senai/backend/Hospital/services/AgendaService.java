@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -16,48 +15,45 @@ public class AgendaService {
     private final PacienteRepository pacienteRepo;
     private final MedicoRepository medicoRepo;
     private final TratamentoRepository tratamentoRepo;
+    private final HorarioRepository horarioRepo;
 
-    public AgendaService(AgendaRepository agendaRepo, PacienteRepository pacienteRepo,
-                         MedicoRepository medicoRepo, TratamentoRepository tratamentoRepo) {
+    public AgendaService(AgendaRepository agendaRepo,
+                         PacienteRepository pacienteRepo,
+                         MedicoRepository medicoRepo,
+                         TratamentoRepository tratamentoRepo,
+                         HorarioRepository horarioRepo) {
         this.agendaRepo = agendaRepo;
         this.pacienteRepo = pacienteRepo;
         this.medicoRepo = medicoRepo;
         this.tratamentoRepo = tratamentoRepo;
+        this.horarioRepo = horarioRepo;
     }
 
-    // criar agenda aplicando regras
-    public Agenda criarAgenda(Integer pacienteId, Integer medicoId, LocalDateTime dataHora, Set<Integer> tratamentoIds, String observacoes) {
+    // salvar: recebe Agenda (apenas observacoes) + ids
+    public Agenda salvar(Agenda agendaInput, Integer pacienteId, Integer medicoId, Integer horarioId, Set<Integer> tratamentoIds) {
         LocalDateTime agora = LocalDateTime.now();
 
-        // Regra 3: não agendar no passado
-        if (dataHora.isBefore(agora)) {
-            throw new IllegalArgumentException("Não é permitido agendar para horário passado.");
-        }
-
         Paciente paciente = pacienteRepo.findById(pacienteId).orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
-        if (!Boolean.TRUE.equals(paciente.getStatus())) {
-            throw new IllegalArgumentException("Paciente inativo não pode agendar.");
-        }
+        if (!Boolean.TRUE.equals(paciente.getStatus())) throw new IllegalArgumentException("Paciente inativo.");
 
         Medico medico = medicoRepo.findById(medicoId).orElseThrow(() -> new RuntimeException("Médico não encontrado"));
-        if (!Boolean.TRUE.equals(medico.getStatus())) {
-            throw new IllegalArgumentException("Médico inativo não pode ser atribuído.");
-        }
+        if (!Boolean.TRUE.equals(medico.getStatus())) throw new IllegalArgumentException("Médico inativo.");
 
-        // Regra 4: médico não pode ter dois agendamentos na mesma data
-        LocalDate dia = dataHora.toLocalDate();
-        LocalDateTime start = dia.atStartOfDay();
-        LocalDateTime end = dia.atTime(LocalTime.MAX);
-        List<Agenda> agendasDoDia = agendaRepo.findByMedicoAndDataHoraBetweenAndStatusTrue(medico, start, end);
-        if (!agendasDoDia.isEmpty()) {
-            // regra estrita: não permitir outro agendamento na mesma data
-            throw new IllegalArgumentException("Médico já possui agendamento nessa data.");
-        }
+        Horario horario = horarioRepo.findById(horarioId).orElseThrow(() -> new RuntimeException("Horário não encontrado"));
+        if (!Boolean.TRUE.equals(horario.getStatus())) throw new IllegalArgumentException("Horário inativo.");
+        if (!horario.getMedico().getId().equals(medicoId)) throw new IllegalArgumentException("Horário não pertence ao médico informado.");
 
-        // Regra 9: máximo 10 tratamentos por agendamento
-        if (tratamentoIds != null && tratamentoIds.size() > 10) {
-            throw new IllegalArgumentException("Máximo de 10 tratamentos por agendamento.");
-        }
+        // não permitir agendar no passado (com base em dia+horaInicial)
+        LocalDate horarioDia = horario.getDia();
+        if (horarioDia.isBefore(agora.toLocalDate())) throw new IllegalArgumentException("Não é permitido agendar para dia passado.");
+        if (horarioDia.isEqual(agora.toLocalDate()) && horario.getHoraInicial().isBefore(agora.toLocalTime())) throw new IllegalArgumentException("Não é permitido agendar para horário passado.");
+
+        // não permitir usar horario já ocupado (verificar se já existe agenda com esse horario)
+        List<Agenda> agendasComHorario = agendaRepo.findByHorarioIdAndStatusTrue(horarioId);
+        if (!agendasComHorario.isEmpty()) throw new IllegalArgumentException("Horário já ocupado.");
+
+        // máximo 10 tratamentos
+        if (tratamentoIds != null && tratamentoIds.size() > 10) throw new IllegalArgumentException("Máximo 10 tratamentos por agendamento.");
 
         Set<Tratamento> tratamentos = new HashSet<>();
         if (tratamentoIds != null) {
@@ -67,31 +63,80 @@ public class AgendaService {
             }
         }
 
+        // regra: médico não pode ter dois agendamentos na mesma data
+        LocalDate dia = horario.getDia();
+        List<Agenda> agendasDoDia = agendaRepo.findByMedicoIdAndHorarioDiaAndStatusTrue(medicoId, dia);
+        if (!agendasDoDia.isEmpty()) throw new IllegalArgumentException("Médico já possui agendamento nessa data.");
+
+        // montar agenda
         Agenda a = new Agenda();
         a.setPaciente(paciente);
         a.setMedico(medico);
-        a.setDataHora(dataHora);
+        a.setHorario(horario);
         a.setTratamentos(tratamentos);
-        a.setObservacoes(observacoes);
+        a.setObservacoes(agendaInput.getObservacoes());
         a.setStatus(true);
         a.setDataCriacao(LocalDateTime.now());
         a.setDataAtualizacao(LocalDateTime.now());
 
-        return agendaRepo.save(a);
+        Agenda salvo = agendaRepo.save(a);
+        return salvo;
     }
 
-    public Optional<Agenda> buscar(Integer id) {
-        return agendaRepo.findById(id);
+    public Agenda buscarPorId(Integer id) {
+        return agendaRepo.findById(id).orElse(null);
     }
 
-    public List<Agenda> listarAtivos() {
-        return agendaRepo.findByStatusTrue();
+    public List<Agenda> listarTodos() {
+        return agendaRepo.findAll();
     }
 
-    public Agenda desativarAgenda(Integer id) {
-        Agenda a = agendaRepo.findById(id).orElseThrow(() -> new RuntimeException("Agenda não encontrada"));
-        a.setStatus(false);
-        a.setDataAtualizacao(LocalDateTime.now());
-        return agendaRepo.save(a);
+    public Long contar() {
+        return agendaRepo.count();
+    }
+
+    public void removerPorId(Integer id) {
+        agendaRepo.deleteById(id);
+    }
+
+    // atualização total (PUT)
+    public Agenda atualizar(Integer id, Agenda novo) {
+        Agenda atual = agendaRepo.findById(id).orElseThrow(() -> new RuntimeException("Agenda não encontrada"));
+
+        // Para atualização total aceitamos que o cliente forneça objetos Paciente, Medico e Horario com IDs válidos.
+        // Validar paciente
+        if (novo.getPaciente() == null || novo.getPaciente().getId() == null)
+            throw new IllegalArgumentException("Paciente obrigatório com id");
+        Paciente paciente = pacienteRepo.findById(novo.getPaciente().getId()).orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+        if (!Boolean.TRUE.equals(paciente.getStatus())) throw new IllegalArgumentException("Paciente inativo.");
+
+        // Validar medico
+        if (novo.getMedico() == null || novo.getMedico().getId() == null)
+            throw new IllegalArgumentException("Médico obrigatório com id");
+        Medico medico = medicoRepo.findById(novo.getMedico().getId()).orElseThrow(() -> new RuntimeException("Médico não encontrado"));
+        if (!Boolean.TRUE.equals(medico.getStatus())) throw new IllegalArgumentException("Médico inativo.");
+
+        // Validar horario
+        if (novo.getHorario() == null || novo.getHorario().getId() == null)
+            throw new IllegalArgumentException("Horário obrigatório com id");
+        Horario novoHorario = horarioRepo.findById(novo.getHorario().getId()).orElseThrow(() -> new RuntimeException("Horário não encontrado"));
+        if (!Boolean.TRUE.equals(novoHorario.getStatus())) throw new IllegalArgumentException("Horário inativo.");
+        if (!novoHorario.getMedico().getId().equals(medico.getId())) throw new IllegalArgumentException("Horário não pertence ao médico.");
+
+        // Verificar se novoHorario já está ocupado por outra agenda diferente
+        List<Agenda> agendasComHorario = agendaRepo.findByHorarioIdAndStatusTrue(novoHorario.getId());
+        boolean ocupadoPorOutro = agendasComHorario.stream().anyMatch(a -> !a.getId().equals(atual.getId()));
+        if (ocupadoPorOutro) throw new IllegalArgumentException("Novo horário já ocupado.");
+
+        // aplicar atualização total
+        atual.setPaciente(paciente);
+        atual.setMedico(medico);
+        atual.setHorario(novoHorario);
+        atual.setTratamentos(novo.getTratamentos());
+        atual.setObservacoes(novo.getObservacoes());
+        atual.setStatus(novo.getStatus());
+        atual.setDataAtualizacao(LocalDateTime.now());
+
+        return agendaRepo.save(atual);
     }
 }

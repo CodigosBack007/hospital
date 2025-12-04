@@ -1,6 +1,7 @@
 package com.senai.backend.Hospital.models;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -15,36 +16,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "agendas")
 public class Agenda {
-   @Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-   private Integer id;
-
-   @Column(name = "tratamento")
-   private String tratamento;
-
-   @Column(name = "consulta")
-   private String consulta;
-
-   @Column(name = "custo")
-   private Double custo;
-   
-   @Column(name = "categoria")
-   private String categoria;
-
-   @Column(name = "descrição")
-   private String descricao;
-
-   @Column(name = "data_hora")
-  private LocalDateTime dataHora;
-
-  @Column(name = "observacoes")
-  private String observacoes;
+    private Integer id;
 
 
-   @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "paciente_id")
     private Paciente paciente;
 
@@ -52,38 +32,49 @@ public class Agenda {
     @JoinColumn(name = "medico_id")
     private Medico medico;
 
+    @ManyToOne
+    @JoinColumn(name = "horario_id")
+    private Horario horario;
+
     @ManyToMany
     @JoinTable(
         name = "agenda_tratamentos",
         joinColumns = @JoinColumn(name = "agenda_id"),
         inverseJoinColumns = @JoinColumn(name = "tratamento_id")
     )
-    private Set<Tratamento> tratamentos;
+    private Set<Tratamento> tratamentos = new HashSet<>();
+
+  
+    @Column(name = "observacoes")
+    private String observacoes;
 
     private Boolean status = true;
 
-    @Column(name = "Data_Criação")
-    private LocalDateTime dataCriacao;
+    @Column(name = "data_criacao")
+    private LocalDateTime dataCriacao = LocalDateTime.now();
 
-    @Column(name = "Data_Atualizada")
-    private LocalDateTime dataAtualizacao;
+    @Column(name = "data_atualizacao")
+    private LocalDateTime dataAtualizacao = LocalDateTime.now();
 
+    
     public Agenda() {
     }
 
-    public Agenda(String categoria, String consulta, Double custo, LocalDateTime dataAtualizacao, LocalDateTime dataCriacao, String descricao, Integer id, Medico medico, Paciente paciente, String tratamento, Set<Tratamento> tratamentos) {
-        this.categoria = categoria;
-        this.consulta = consulta;
-        this.custo = custo;
-        this.dataAtualizacao = dataAtualizacao;
-        this.dataCriacao = dataCriacao;
-        this.descricao = descricao;
+
+    public Agenda(Integer id, Paciente paciente, Medico medico, Horario horario, Set<Tratamento> tratamentos,
+            String observacoes, Boolean status, LocalDateTime dataCriacao, LocalDateTime dataAtualizacao) {
         this.id = id;
-        this.medico = medico;
         this.paciente = paciente;
-        this.tratamento = tratamento;
+        this.medico = medico;
+        this.horario = horario;
         this.tratamentos = tratamentos;
+        this.observacoes = observacoes;
+        this.status = status;
+        this.dataCriacao = dataCriacao;
+        this.dataAtualizacao = dataAtualizacao;
     }
+
+
 
     public Integer getId() {
         return id;
@@ -91,46 +82,6 @@ public class Agenda {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getTratamento() {
-        return tratamento;
-    }
-
-    public void setTratamento(String tratamento) {
-        this.tratamento = tratamento;
-    }
-
-    public String getConsulta() {
-        return consulta;
-    }
-
-    public void setConsulta(String consulta) {
-        this.consulta = consulta;
-    }
-
-    public Double getCusto() {
-        return custo;
-    }
-
-    public void setCusto(Double custo) {
-        this.custo = custo;
-    }
-
-    public String getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
     }
 
     public Paciente getPaciente() {
@@ -149,12 +100,28 @@ public class Agenda {
         this.medico = medico;
     }
 
+    public Horario getHorario() {
+        return horario;
+    }
+
+    public void setHorario(Horario horario) {
+        this.horario = horario;
+    }
+
     public Set<Tratamento> getTratamentos() {
         return tratamentos;
     }
 
     public void setTratamentos(Set<Tratamento> tratamentos) {
         this.tratamentos = tratamentos;
+    }
+
+    public String getObservacoes() {
+        return observacoes;
+    }
+
+    public void setObservacoes(String observacoes) {
+        this.observacoes = observacoes;
     }
 
     public Boolean getStatus() {
@@ -180,22 +147,4 @@ public class Agenda {
     public void setDataAtualizacao(LocalDateTime dataAtualizacao) {
         this.dataAtualizacao = dataAtualizacao;
     }
-
-    public LocalDateTime getDataHora() {
-        return dataHora;
-    }
-
-    public void setDataHora(LocalDateTime dataHora) {
-        this.dataHora = dataHora;
-    }
-
-    public String getObservacoes() {
-        return observacoes;
-    }
-
-    public void setObservacoes(String observacoes) {
-        this.observacoes = observacoes;
-    }
-
-
 }

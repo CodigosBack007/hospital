@@ -1,16 +1,21 @@
 package com.senai.backend.Hospital.models;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tratamentos")
 public class Tratamento {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; // código único
+    private Integer id;
 
     private String descricao;
     private Double custo;
@@ -24,8 +29,7 @@ public class Tratamento {
     @ManyToMany(mappedBy = "tratamentos")
     private Set<Agenda> agendas;
 
-    // getters e setters
-
+    // getters/setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
