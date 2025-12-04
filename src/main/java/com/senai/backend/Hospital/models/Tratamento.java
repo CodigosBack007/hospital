@@ -29,6 +29,26 @@ public class Tratamento {
     @ManyToMany(mappedBy = "tratamentos")
     private Set<Agenda> agendas;
 
+
+    public Tratamento() {
+    }
+
+
+    
+    public Tratamento(Integer id, String descricao, Double custo, String categoria, Boolean status,
+            LocalDateTime dataCriacao, LocalDateTime dataAtualizacao, Set<Agenda> agendas) {
+        this.id = id;
+        this.descricao = descricao;
+        this.custo = custo;
+        this.categoria = categoria;
+        this.status = status;
+        this.dataCriacao = dataCriacao;
+        this.dataAtualizacao = dataAtualizacao;
+        this.agendas = agendas;
+    }
+
+
+
     // getters/setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

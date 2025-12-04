@@ -35,6 +35,28 @@ public class Medico {
     @JoinColumn(name = "medico_id")
     private List<Horario> horarios;
 
+    public Medico() {
+    }
+
+    
+    public Medico(Integer id, String nome, String competencia, String cim, String endereco, String contato,
+            String turno, Integer limiteDiario, Boolean status, LocalDateTime dataCriacao,
+            LocalDateTime dataAtualizacao, List<Horario> horarios) {
+        this.id = id;
+        this.nome = nome;
+        this.competencia = competencia;
+        this.cim = cim;
+        this.endereco = endereco;
+        this.contato = contato;
+        this.turno = turno;
+        this.limiteDiario = limiteDiario;
+        this.status = status;
+        this.dataCriacao = dataCriacao;
+        this.dataAtualizacao = dataAtualizacao;
+        this.horarios = horarios;
+    }
+
+
     // getters / setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

@@ -27,7 +27,25 @@ public class Paciente {
     private LocalDateTime dataAtualizacao;
 
     // getters e setters
+    public Paciente() {
+    }
+    
+
+    public Paciente(Integer id, String nome, String endereco, String contato, String descricao, Boolean status,
+            LocalDateTime dataCriacao, LocalDateTime dataAtualizacao) {
+        this.id = id;
+        this.nome = nome;
+        this.endereco = endereco;
+        this.contato = contato;
+        this.descricao = descricao;
+        this.status = status;
+        this.dataCriacao = dataCriacao;
+        this.dataAtualizacao = dataAtualizacao;
+    }
+
+
     public Integer getId() { return id; }
+    
     public void setId(Integer id) { this.id = id; }
 
     public String getNome() { return nome; }
