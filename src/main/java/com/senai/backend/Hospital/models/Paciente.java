@@ -38,7 +38,7 @@ public class Paciente {
         this.endereco = endereco;
         this.contato = contato;
         this.descricao = descricao;
-        this.status = status;
+        this.status = true;
         this.dataCriacao = dataCriacao;
         this.dataAtualizacao = dataAtualizacao;
     }

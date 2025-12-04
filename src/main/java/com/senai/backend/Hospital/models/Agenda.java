@@ -69,7 +69,7 @@ public class Agenda {
         this.horario = horario;
         this.tratamentos = tratamentos;
         this.observacoes = observacoes;
-        this.status = status;
+        this.status = true;
         this.dataCriacao = dataCriacao;
         this.dataAtualizacao = dataAtualizacao;
     }

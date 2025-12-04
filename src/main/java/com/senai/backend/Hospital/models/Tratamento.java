@@ -41,7 +41,7 @@ public class Tratamento {
         this.descricao = descricao;
         this.custo = custo;
         this.categoria = categoria;
-        this.status = status;
+        this.status = true;
         this.dataCriacao = dataCriacao;
         this.dataAtualizacao = dataAtualizacao;
         this.agendas = agendas;

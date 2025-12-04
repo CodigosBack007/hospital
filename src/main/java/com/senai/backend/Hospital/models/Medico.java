@@ -50,7 +50,7 @@ public class Medico {
         this.contato = contato;
         this.turno = turno;
         this.limiteDiario = limiteDiario;
-        this.status = status;
+        this.status = true;
         this.dataCriacao = dataCriacao;
         this.dataAtualizacao = dataAtualizacao;
         this.horarios = horarios;
