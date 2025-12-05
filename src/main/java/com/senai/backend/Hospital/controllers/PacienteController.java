@@ -21,17 +21,17 @@ public class PacienteController {
     @Autowired
     private PacienteService PacienteService;
 
-    @PostMapping
+    @PostMapping("salvar")
     public Paciente salvar(@RequestBody Paciente Paciente) {
         return PacienteService.salvar(Paciente);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/buscar por {id}")
     public Paciente buscarPorId(@PathVariable Integer id) {
         return PacienteService.buscarPorId(id);
     }
 
-    @GetMapping
+    @GetMapping("listar")
     public List<Paciente> listarTodos() {
         return PacienteService.listarTodos();
     }
@@ -41,7 +41,7 @@ public class PacienteController {
         return PacienteService.contar();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/remover por {id}")
     public void remover(@PathVariable Integer id) {
         PacienteService.remover(id);
     }
