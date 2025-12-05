@@ -3,6 +3,9 @@ package com.senai.backend.Hospital.models;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,19 +19,37 @@ import jakarta.persistence.Table;
 public class Medico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+     @Column(name="id")
     private Integer id;
 
+     @Column(name="nome")
     private String nome;
+
+     @Column(name="competencia")
     private String competencia;
+
+     @Column(name="CIM")
     private String cim;
+
+     @Column(name="endereço")
     private String endereco;
+
+     @Column(name="contato")
     private String contato;
+
+     @Column(name="turno")
     private String turno;
+
     private Integer limiteDiario = 10;
 
     private Boolean status = true;
 
+     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+     @Column(name="data_criação")
     private LocalDateTime dataCriacao;
+
+     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+     @Column(name="data_atualização")
     private LocalDateTime dataAtualizacao;
 
     @OneToMany
@@ -51,8 +72,8 @@ public class Medico {
         this.turno = turno;
         this.limiteDiario = limiteDiario;
         this.status = true;
-        this.dataCriacao = dataCriacao;
-        this.dataAtualizacao = dataAtualizacao;
+        this.dataCriacao = LocalDateTime.now();
+        this.dataAtualizacao = LocalDateTime.now();
         this.horarios = horarios;
     }
 

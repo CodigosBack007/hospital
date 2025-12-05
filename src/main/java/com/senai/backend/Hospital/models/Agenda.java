@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,7 @@ public class Agenda {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id")
     private Integer id;
 
 
@@ -50,9 +53,11 @@ public class Agenda {
 
     private Boolean status = true;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "data_criacao")
     private LocalDateTime dataCriacao = LocalDateTime.now();
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao = LocalDateTime.now();
 
@@ -70,8 +75,8 @@ public class Agenda {
         this.tratamentos = tratamentos;
         this.observacoes = observacoes;
         this.status = true;
-        this.dataCriacao = dataCriacao;
-        this.dataAtualizacao = dataAtualizacao;
+        this.dataCriacao = LocalDateTime.now();
+        this.dataAtualizacao = LocalDateTime.now();
     }
 
 
