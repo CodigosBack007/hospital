@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 @OpenAPIDefinition(
     info = @Info(
         title = "Gerenciamento de Tarefas",
-        version = "2.0",
+        version = "3.0",
         description = "email para contato: joaogabrielfaria080b@gmail.com"
     )
 )
