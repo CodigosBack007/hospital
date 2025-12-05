@@ -1,8 +1,8 @@
 package com.senai.backend.Hospital.services;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.senai.backend.Hospital.models.Medico;
@@ -11,47 +11,26 @@ import com.senai.backend.Hospital.repositories.MedicoRepository;
 @Service
 public class MedicoService {
 
-    private final MedicoRepository medicoRepo;
+    @Autowired
+    private MedicoRepository medicoRepository;
 
-    public MedicoService(MedicoRepository medicoRepo) {
-        this.medicoRepo = medicoRepo;
-    }
-
-    public Medico salvar(Medico m) {
-        LocalDateTime now = LocalDateTime.now();
-        m.setDataCriacao(now);
-        m.setDataAtualizacao(now);
-        if (m.getStatus() == null) m.setStatus(true);
-        return medicoRepo.save(m);
+    public Medico salvar(Medico medico) {
+        return medicoRepository.save(medico);
     }
 
     public Medico buscarPorId(Integer id) {
-        return medicoRepo.findById(id).orElse(null);
+        return medicoRepository.findById(id).orElse(null);
     }
 
     public List<Medico> listarTodos() {
-        return medicoRepo.findAll();
+        return medicoRepository.findAll();
     }
 
     public Long contar() {
-        return medicoRepo.count();
+        return medicoRepository.count();
     }
 
-    public void removerPorId(Integer id) {
-        medicoRepo.deleteById(id);
-    }
-
-    public Medico atualizar(Integer id, Medico novo) {
-        Medico atual = medicoRepo.findById(id).orElseThrow(() -> new RuntimeException("Médico não encontrado"));
-        atual.setNome(novo.getNome());
-        atual.setCompetencia(novo.getCompetencia());
-        atual.setCim(novo.getCim());
-        atual.setEndereco(novo.getEndereco());
-        atual.setContato(novo.getContato());
-        atual.setTurno(novo.getTurno());
-        atual.setLimiteDiario(novo.getLimiteDiario());
-        atual.setStatus(novo.getStatus());
-        atual.setDataAtualizacao(LocalDateTime.now());
-        return medicoRepo.save(atual);
+    public void remover(Integer id) {
+        medicoRepository.deleteById(id);
     }
 }
