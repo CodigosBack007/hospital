@@ -12,25 +12,46 @@ import com.senai.backend.Hospital.repositories.TratamentoRepository;
 public class TratamentoService {
 
     @Autowired
-    private TratamentoRepository tratamentoRepository;
+    private TratamentoRepository TratamentoRepository;
 
-    public Tratamento salvar(Tratamento tratamento) {
-        return tratamentoRepository.save(tratamento);
+    // salvar - POST
+    public Tratamento salvar(Tratamento Tratamento) {
+        return TratamentoRepository.save(Tratamento);
     }
 
+    // buscar pelo id - GET
     public Tratamento buscarPorId(Integer id) {
-        return tratamentoRepository.findById(id).orElse(null);
+        return TratamentoRepository.findById(id).get();
     }
 
+    // listar todos - GET
     public List<Tratamento> listarTodos() {
-        return tratamentoRepository.findAll();
+        return TratamentoRepository.findAll();
     }
 
-    public Long contar() {
-        return tratamentoRepository.count();
+    // contar - GET
+    public long contar() {
+        return TratamentoRepository.count();
     }
 
-    public void remover(Integer id) {
-        tratamentoRepository.deleteById(id);
+    // remover pelo id - DELETE
+    public boolean removerPorId(Integer id) {
+        Tratamento pac = TratamentoRepository.findById(id).get();
+        if (pac != null) {
+            TratamentoRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
+
+    // atualizar - PUT
+    public Tratamento atualizar(Integer id, Tratamento Tratamento) {
+        Tratamento pac = TratamentoRepository.findById(id).get();
+        if (Tratamento != null) {
+            Tratamento.setId(pac.getId());
+            return TratamentoRepository.save(Tratamento);
+        }
+        return null;
+    }
+
 }

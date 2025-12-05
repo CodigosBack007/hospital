@@ -11,28 +11,48 @@ import com.senai.backend.Hospital.repositories.PacienteRepository;
 
 @Service
 public class PacienteService {
+
     @Autowired
-    private PacienteRepository cliRepository;
+    private PacienteRepository pacienteRepository;
 
-     public Paciente salvar(Paciente Paciente){
-        return cliRepository.save(Paciente);
+    // salvar - POST
+    public Paciente salvar(Paciente paciente) {
+        return pacienteRepository.save(paciente);
     }
 
+    // buscar pelo id - GET
     public Paciente buscarPorId(Integer id) {
-        return cliRepository.findById(id).orElse(null);
+        return pacienteRepository.findById(id).get();
     }
 
+    // listar todos - GET
     public List<Paciente> listarTodos() {
-        return cliRepository.findAll();
+        return pacienteRepository.findAll();
     }
 
+    // contar - GET
     public long contar() {
-        return cliRepository.count();
+        return pacienteRepository.count();
     }
 
-    public boolean remover(Integer id) {
-        if (!cliRepository.existsById(id)) return false;
-        cliRepository.deleteById(id);
-        return true;
+    // remover pelo id - DELETE
+    public boolean removerPorId(Integer id) {
+        Paciente pac = pacienteRepository.findById(id).get();
+        if (pac != null) {
+            pacienteRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
+
+    // atualizar - PUT
+    public Paciente atualizar(Integer id, Paciente paciente) {
+        Paciente pac = pacienteRepository.findById(id).get();
+        if (paciente != null) {
+            paciente.setId(pac.getId());
+            return pacienteRepository.save(paciente);
+        }
+        return null;
+    }
+
 }
